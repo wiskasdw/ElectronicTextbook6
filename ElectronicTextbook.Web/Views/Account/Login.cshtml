@@ -1,5 +1,23 @@
-﻿@*
-    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
-*@
-@{
-}
+﻿html
+    @model ElectronicTextbook.Web.ViewModels.LoginViewModel
+<h2>Login</h2>
+<form asp-controller="Account" asp-action="Login" method="post">
+    <div asp-validation-summary="All"></div>
+    <div>
+        <label asp-for="Email">Email</label><br />
+        <input asp-for="Email" />
+        <span asp-validation-for="Email"></span>
+    </div>
+    <div>
+        <label asp-for="Password">Password</label><br />
+        <input asp-for="Password" type="password" />
+        <span asp-validation-for="Password"></span>
+    </div>
+    <div>
+        <label asp-for="RememberMe">Remember?</label><br />
+        <input asp-for="RememberMe" />
+    </div>
+    <div>
+        <input type="submit" value="Login" />
+    </div>
+</form>

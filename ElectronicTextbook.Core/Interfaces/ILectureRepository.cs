@@ -1,12 +1,16 @@
-﻿using System;
+﻿using ElectronicTextbook.Core.Models;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace ElectronicTextbook.Core.Interfaces
 {
-    internal class ILectureRepository
+    public interface ILectureRepository
     {
+        Task<Lecture> GetByIdAsync(int id);
+        Task<IEnumerable<Lecture>> GetAllAsync();
+        Task AddAsync(Lecture lecture);
+        Task UpdateAsync(Lecture lecture);
+        Task DeleteAsync(int id);
+        Task<IEnumerable<Lecture>> SearchAsync(string searchTerm);
     }
 }

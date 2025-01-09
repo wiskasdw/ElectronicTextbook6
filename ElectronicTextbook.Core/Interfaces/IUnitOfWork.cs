@@ -1,12 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 
 namespace ElectronicTextbook.Core.Interfaces
 {
-    internal class IUnitOfWork
+    public interface IUnitOfWork
     {
+        ILectureRepository Lectures { get; }
+        IUserRepository Users { get; }
+        Task SaveAsync();
     }
 }

@@ -6,7 +6,9 @@ using System.Threading.Tasks;
 
 namespace ElectronicTextbook.Core.Enums
 {
-    internal class RoleType
+    public enum RoleType
     {
+        Student,
+        Admin
     }
 }
