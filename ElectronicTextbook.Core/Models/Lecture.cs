@@ -1,5 +1,4 @@
 ﻿using System;
-using System.ComponentModel.DataAnnotations;
 
 namespace ElectronicTextbook.Core.Models
 {
@@ -8,8 +7,9 @@ namespace ElectronicTextbook.Core.Models
         public int Id { get; set; }
         public string Title { get; set; }
         public string Description { get; set; }
-        public string AuthorId { get; set; } // Should be string to match User.Id
+        public byte[] PdfFile { get; set; }
+        public DateTime DateAdded { get; set; }
+        public int AuthorId { get; set; }
         public User Author { get; set; }
     }
-
 }

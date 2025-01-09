@@ -1,28 +1,47 @@
-﻿using System.ComponentModel.DataAnnotations;
-    namespace ElectronicTextbook.Web.ViewModels
-    {
-        public class RegisterViewModel
-        {
-            [Required(ErrorMessage = "Enter First Name")]
-            [Display(Name = "First Name")]
-            public string FirstName { get; set; }
+﻿@model IEnumerable<ElectronicTextbook.Web.ViewModels.LectureViewModel>
 
-            [Required(ErrorMessage = "Enter Last Name")]
-            [Display(Name = "Last Name")]
-            public string LastName { get; set; }
+@{
+    ViewData["Title"] = "Индекс";
+}
 
-            [Required(ErrorMessage = "Enter Email")]
-            [Display(Name = "Email")]
-            public string Email { get; set; }
-
-            [Required(ErrorMessage = "Enter password")]
-            [DataType(DataType.Password)]
-            [Display(Name = "Password")]
-            public string Password { get; set; }
-
-            [DataType(DataType.Password)]
-            [Compare("Password", ErrorMessage = "Password not matching")]
-             [Display(Name = "Confirm Password")]
-            public string ConfirmPassword { get; set; }
-        }
-    }
+<h1>Лекции</h1>
+<p>
+    <a asp-action="Create" class="btn btn-primary">Создать новую лекцию</a>
+</p>
+<div class="container mt-4">
+    <form asp-action="Index" method="get" class="form-inline mb-3">
+        <div class="form-group">
+            <label for="searchTerm" class="mr-2">Поиск по заголовку или описанию:</label>
+            <input type="text" id="searchTerm" name="searchTerm" class="form-control" value="@ViewData["CurrentFilter"]" />
+            <input type="submit" value="Поиск" class="btn btn-default ml-2" />
+            <a asp-action="Index" class="btn btn-link ml-2">Вернуться к полному списку</a>
+        </div>
+    </form>
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>Заголовок</th>
+                <th>Описание</th>
+                <th>Автор</th>
+                <th>Дата добавления</th>
+                <th>Действия</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model)
+            {
+                <tr>
+                    <td>@Html.DisplayFor(modelItem => item.Title)</td>
+                    <td>@Html.DisplayFor(modelItem => item.Description)</td>
+                    <td>@Html.DisplayFor(modelItem => item.AuthorName)</td>
+                    <td>@Html.DisplayFor(modelItem => item.DateAdded)</td>
+                    <td>
+                        <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-warning btn-sm">Редактировать</a>
+                        <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-info btn-sm">Детали</a>
+                        <a asp-action="Delete" asp-route-id="@item.Id" class="btn btn-danger btn-sm">Удалить</a>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>

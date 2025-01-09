@@ -1,20 +1,19 @@
-﻿using ElectronicTextbook.Core.Interfaces;
+﻿using System.Threading.Tasks;
+using ElectronicTextbook.Core.Interfaces;
 using ElectronicTextbook.Infrastructure.Data;
-using System.Threading.Tasks;
 
 namespace ElectronicTextbook.Infrastructure.Repositories
 {
     public class UnitOfWork : IUnitOfWork
     {
         private readonly AppDbContext _context;
+        public ILectureRepository Lectures { get; }
 
-        public UnitOfWork(AppDbContext context)
+        public UnitOfWork(AppDbContext context, ILectureRepository lectureRepository)
         {
             _context = context;
+            Lectures = lectureRepository;
         }
-
-        public ILectureRepository Lectures => new LectureRepository(_context);
-        public IUserRepository Users => new UserRepository(_context);
 
         public async Task SaveAsync()
         {

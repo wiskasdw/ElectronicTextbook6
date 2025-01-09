@@ -1,10 +1,9 @@
-﻿using ElectronicTextbook.Core.Interfaces;
+﻿using System.Collections.Generic;
+using System.Threading.Tasks;
+using ElectronicTextbook.Core.Interfaces;
 using ElectronicTextbook.Core.Models;
 using ElectronicTextbook.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace ElectronicTextbook.Infrastructure.Repositories
 {
@@ -17,14 +16,14 @@ namespace ElectronicTextbook.Infrastructure.Repositories
             _context = context;
         }
 
-        public async Task<Lecture> GetByIdAsync(int id)
-        {
-            return await _context.Lectures.FindAsync(id);
-        }
-
         public async Task<IEnumerable<Lecture>> GetAllAsync()
         {
-            return await _context.Lectures.ToListAsync();
+            return await _context.Lectures.Include(l => l.Author).ToListAsync();
+        }
+
+        public async Task<Lecture> GetByIdAsync(int id)
+        {
+            return await _context.Lectures.Include(l => l.Author).FirstOrDefaultAsync(l => l.Id == id);
         }
 
         public async Task AddAsync(Lecture lecture)
@@ -39,18 +38,18 @@ namespace ElectronicTextbook.Infrastructure.Repositories
 
         public async Task DeleteAsync(int id)
         {
-            var lecture = await _context.Lectures.FindAsync(id);
+            var lecture = await GetByIdAsync(id);
             if (lecture != null)
             {
                 _context.Lectures.Remove(lecture);
             }
         }
+
         public async Task<IEnumerable<Lecture>> SearchAsync(string searchTerm)
         {
-            return await _context.Lectures.Where(l =>
-                l.Title.Contains(searchTerm) ||
-                l.Description.Contains(searchTerm)
-           ).ToListAsync();
+            return await _context.Lectures
+                .Where(l => l.Title.Contains(searchTerm) || l.Description.Contains(searchTerm))
+                .ToListAsync();
         }
     }
 }

@@ -1,30 +1,14 @@
-﻿using ElectronicTextbook.Core.Models;
-using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
+using ElectronicTextbook.Core.Models;
 
 namespace ElectronicTextbook.Infrastructure.Data
 {
-    public class AppDbContext : IdentityDbContext<User, Role, string> // Верно
+    public class AppDbContext : DbContext
     {
-        public AppDbContext(DbContextOptions<AppDbContext> options) : base(options)
-        {
-        }
+        public AppDbContext(DbContextOptions<AppDbContext> options) : base(options) { }
 
         public DbSet<Lecture> Lectures { get; set; }
-
-        protected override void OnModelCreating(ModelBuilder builder)
-        {
-            base.OnModelCreating(builder);
-
-            builder.Entity<User>()
-                .HasOne(u => u.Role)
-                .WithMany(r => r.Users)
-                .HasForeignKey(u => u.RoleId);  //  Используйте RoleId
-
-            builder.Entity<Lecture>()
-                .HasOne(l => l.Author)
-                .WithMany(u => u.Lectures)
-                .HasForeignKey(l => l.AuthorId);
-        }
+        public DbSet<User> Users { get; set; }
+        public DbSet<Role> Roles { get; set; }
     }
 }

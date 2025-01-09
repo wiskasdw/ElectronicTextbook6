@@ -1,0 +1,15 @@
+﻿@{
+    ViewData["Title"] = "Главная страница";
+}
+
+<div class="container mt-5">
+    <h1 class="text-center">@ViewData["Title"]</h1>
+    <p class="text-center">Добро пожаловать на главную страницу!</p>
+</div>
+
+<script>
+    document.getElementById('welcomeButton').addEventListener('click', function() {
+        var message = document.getElementById('greetingMessage');
+        message.style.display = message.style.display === 'none' ? 'block' : 'none';
+    });
+</script>

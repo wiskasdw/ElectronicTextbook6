@@ -8,7 +8,7 @@ namespace ElectronicTextbook.Core.Enums
 {
     public enum RoleType
     {
-        Student,
-        Admin
+        Admin,
+        User
     }
 }

@@ -1,16 +1,14 @@
-﻿using ElectronicTextbook.Core.Models;
-using System.Collections.Generic;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
+using ElectronicTextbook.Core.Models;
 
 namespace ElectronicTextbook.Core.Interfaces
 {
     public interface IUserRepository
     {
-        Task<User> GetByIdAsync(string id);
-        Task<IEnumerable<User>> GetAllAsync();
+        Task<User> GetByIdAsync(int id);
+        Task<User> GetByEmailAsync(string email);
         Task AddAsync(User user);
         Task UpdateAsync(User user);
-        Task DeleteAsync(string id);
-        Task<User> GetByEmailAsync(string email);
+        Task DeleteAsync(int id);
     }
 }

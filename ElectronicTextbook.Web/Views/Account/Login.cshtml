@@ -1,23 +1,26 @@
-﻿html
-    @model ElectronicTextbook.Web.ViewModels.LoginViewModel
-<h2>Login</h2>
-<form asp-controller="Account" asp-action="Login" method="post">
-    <div asp-validation-summary="All"></div>
-    <div>
-        <label asp-for="Email">Email</label><br />
-        <input asp-for="Email" />
-        <span asp-validation-for="Email"></span>
+﻿@model ElectronicTextbook.Web.ViewModels.LoginViewModel
+
+<h2>Вход</h2>
+<form asp-controller="Account" asp-action="Login" method="post" class="mt-4">
+    <div asp-validation-summary="All" class="alert alert-danger"></div>
+    <div class="form-group">
+        <label asp-for="Email">Электронная почта</label><br />
+        <input asp-for="Email" class="form-control" />
+        <span asp-validation-for="Email" class="text-danger"></span>
     </div>
-    <div>
-        <label asp-for="Password">Password</label><br />
-        <input asp-for="Password" type="password" />
-        <span asp-validation-for="Password"></span>
+
+    <div class="form-group">
+        <label asp-for="Password">Пароль</label><br />
+        <input asp-for="Password" type="password" class="form-control" />
+        <span asp-validation-for="Password" class="text-danger"></span>
     </div>
-    <div>
-        <label asp-for="RememberMe">Remember?</label><br />
-        <input asp-for="RememberMe" />
+
+    <div class="form-group">
+        <label asp-for="RememberMe">Запомнить меня?</label>
+        <input asp-for="RememberMe" type="checkbox" />
     </div>
+
     <div>
-        <input type="submit" value="Login" />
+        <input type="submit" value="Войти" class="btn btn-primary" />
     </div>
 </form>

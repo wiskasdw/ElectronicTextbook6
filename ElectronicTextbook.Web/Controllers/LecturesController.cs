@@ -3,9 +3,12 @@ using ElectronicTextbook.Core.Models;
 using ElectronicTextbook.Web.ViewModels;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
+using System.Security.Claims;
 using System.Threading.Tasks;
 
 namespace ElectronicTextbook.Web.Controllers
@@ -22,32 +25,24 @@ namespace ElectronicTextbook.Web.Controllers
         // GET: Lectures
         public async Task<IActionResult> Index(string searchTerm = null)
         {
-            IEnumerable<Lecture> lectures;
-            if (string.IsNullOrEmpty(searchTerm))
+            try
             {
-                lectures = await _unitOfWork.Lectures.GetAllAsync();
-            }
-            else
-            {
-                lectures = await _unitOfWork.Lectures.SearchAsync(searchTerm);
-            }
-            var lectureViewModels = new List<LectureViewModel>();
-            foreach (var lecture in lectures)
-            {
-                string base64Pdf = lecture.PdfFile != null ? Convert.ToBase64String(lecture.PdfFile) : null;
-                lectureViewModels.Add(new LectureViewModel
+                IEnumerable<Lecture> lectures;
+                if (string.IsNullOrEmpty(searchTerm))
                 {
-                    Id = lecture.Id,
-                    Title = lecture.Title,
-                    Description = lecture.Description,
-                    PdfFile = base64Pdf,
-                    DateAdded = lecture.DateAdded,
-                    AuthorId = lecture.AuthorId,
-                    AuthorName = lecture.Author?.FirstName + " " + lecture.Author?.LastName
-                });
+                    lectures = await _unitOfWork.Lectures.GetAllAsync();
+                }
+                else
+                {
+                    lectures = await _unitOfWork.Lectures.SearchAsync(searchTerm);
+                }
+                var lectureViewModels = lectures.Select(MapToViewModel).ToList();
+                return View(lectureViewModels);
             }
-            return View(lectureViewModels);
-
+            catch (Exception ex)
+            {
+                return StatusCode(500, "Internal server error" + ex.Message);
+            }
         }
 
         // GET: Lectures/Details/5
@@ -57,27 +52,21 @@ namespace ElectronicTextbook.Web.Controllers
             {
                 return NotFound();
             }
-
-            var lecture = await _unitOfWork.Lectures.GetByIdAsync(id.Value);
-
-            if (lecture == null)
+            try
             {
-                return NotFound();
+                var lecture = await _unitOfWork.Lectures.GetByIdAsync(id.Value);
+
+                if (lecture == null)
+                {
+                    return NotFound();
+                }
+                return View(MapToViewModel(lecture));
             }
-            string base64Pdf = lecture.PdfFile != null ? Convert.ToBase64String(lecture.PdfFile) : null;
-            var lectureViewModel = new LectureViewModel
+            catch (Exception ex)
             {
-                Id = lecture.Id,
-                Title = lecture.Title,
-                Description = lecture.Description,
-                PdfFile = base64Pdf,
-                DateAdded = lecture.DateAdded,
-                AuthorId = lecture.AuthorId,
-                AuthorName = lecture.Author?.FirstName + " " + lecture.Author?.LastName
-            };
-            return View(lectureViewModel);
+                return StatusCode(500, "Internal server error" + ex.Message);
+            }
         }
-
 
         [Authorize(Roles = "Admin")]
         // GET: Lectures/Create
@@ -94,26 +83,43 @@ namespace ElectronicTextbook.Web.Controllers
         {
             if (ModelState.IsValid)
             {
-                byte[] pdfData = null;
-                if (model.PdfFileForm != null && model.PdfFileForm.Length > 0)
+                try
                 {
-                    using (var memoryStream = new MemoryStream())
+                    byte[] pdfData = null;
+                    if (model.PdfFileForm != null && model.PdfFileForm.Length > 0)
                     {
-                        await model.PdfFileForm.CopyToAsync(memoryStream);
-                        pdfData = memoryStream.ToArray();
+                        using (var memoryStream = new MemoryStream())
+                        {
+                            await model.PdfFileForm.CopyToAsync(memoryStream);
+                            pdfData = memoryStream.ToArray();
+                        }
                     }
+                    var userId = User.FindFirstValue("UserId");
+                    if (string.IsNullOrEmpty(userId))
+                    {
+                        return BadRequest("User id not found");
+                    }
+
+                    var lecture = new Lecture
+                    {
+                        Title = model.Title,
+                        Description = model.Description,
+                        PdfFile = pdfData,
+                        DateAdded = DateTime.Now,
+                        AuthorId = int.Parse(userId)
+
+                    };
+
+                    await _unitOfWork.Lectures.AddAsync(lecture);
+                    await _unitOfWork.SaveAsync();
+                    return RedirectToAction(nameof(Index));
                 }
-                var lecture = new Lecture
+                catch (Exception ex)
                 {
-                    Title = model.Title,
-                    Description = model.Description,
-                    PdfFile = pdfData,
-                    DateAdded = DateTime.Now,
-                    AuthorId = int.Parse(User.FindFirst("UserId").Value)
-                };
-                await _unitOfWork.Lectures.AddAsync(lecture);
-                await _unitOfWork.SaveAsync();
-                return RedirectToAction(nameof(Index));
+                    ModelState.AddModelError("", "Error during lecture creation:" + ex.Message);
+                    return View(model);
+                }
+
             }
             return View(model);
         }
@@ -126,22 +132,19 @@ namespace ElectronicTextbook.Web.Controllers
             {
                 return NotFound();
             }
-            var lecture = await _unitOfWork.Lectures.GetByIdAsync(id.Value);
-            if (lecture == null)
+            try
             {
-                return NotFound();
+                var lecture = await _unitOfWork.Lectures.GetByIdAsync(id.Value);
+                if (lecture == null)
+                {
+                    return NotFound();
+                }
+                return View(MapToViewModel(lecture));
             }
-            string base64Pdf = lecture.PdfFile != null ? Convert.ToBase64String(lecture.PdfFile) : null;
-            var lectureViewModel = new LectureViewModel
+            catch (Exception ex)
             {
-                Id = lecture.Id,
-                Title = lecture.Title,
-                Description = lecture.Description,
-                PdfFile = base64Pdf,
-                DateAdded = lecture.DateAdded,
-                AuthorId = lecture.AuthorId
-            };
-            return View(lectureViewModel);
+                return StatusCode(500, "Internal server error" + ex.Message);
+            }
         }
 
         // POST: Lectures/Edit/5
@@ -154,31 +157,38 @@ namespace ElectronicTextbook.Web.Controllers
             {
                 return NotFound();
             }
-
             if (ModelState.IsValid)
             {
-                byte[] pdfData = null;
-                if (model.PdfFileForm != null && model.PdfFileForm.Length > 0)
+                try
                 {
-                    using (var memoryStream = new MemoryStream())
+                    byte[] pdfData = null;
+                    if (model.PdfFileForm != null && model.PdfFileForm.Length > 0)
                     {
-                        await model.PdfFileForm.CopyToAsync(memoryStream);
-                        pdfData = memoryStream.ToArray();
+                        using (var memoryStream = new MemoryStream())
+                        {
+                            await model.PdfFileForm.CopyToAsync(memoryStream);
+                            pdfData = memoryStream.ToArray();
+                        }
                     }
+                    var lecture = new Lecture
+                    {
+                        Id = model.Id,
+                        Title = model.Title,
+                        Description = model.Description,
+                        PdfFile = pdfData,
+                        DateAdded = DateTime.Now,
+                        AuthorId = model.AuthorId
+                    };
+                    await _unitOfWork.Lectures.UpdateAsync(lecture);
+                    await _unitOfWork.SaveAsync();
+                    return RedirectToAction(nameof(Index));
+                }
+                catch (Exception ex)
+                {
+                    ModelState.AddModelError("", "Error during lecture edit:" + ex.Message);
+                    return View(model);
                 }
 
-                var lecture = new Lecture
-                {
-                    Id = model.Id,
-                    Title = model.Title,
-                    Description = model.Description,
-                    PdfFile = pdfData,
-                    DateAdded = DateTime.Now,
-                    AuthorId = model.AuthorId
-                };
-                await _unitOfWork.Lectures.UpdateAsync(lecture);
-                await _unitOfWork.SaveAsync();
-                return RedirectToAction(nameof(Index));
             }
             return View(model);
         }
@@ -191,15 +201,44 @@ namespace ElectronicTextbook.Web.Controllers
             {
                 return NotFound();
             }
-
-            var lecture = await _unitOfWork.Lectures.GetByIdAsync(id.Value);
-
-            if (lecture == null)
+            try
             {
-                return NotFound();
+                var lecture = await _unitOfWork.Lectures.GetByIdAsync(id.Value);
+                if (lecture == null)
+                {
+                    return NotFound();
+                }
+                return View(MapToViewModel(lecture));
+
             }
+            catch (Exception ex)
+            {
+                return StatusCode(500, "Internal server error" + ex.Message);
+            }
+        }
+
+        // POST: Lectures/Delete/5
+        [HttpPost, ActionName("Delete")]
+        [ValidateAntiForgeryToken]
+        [Authorize(Roles = "Admin")]
+        public async Task<IActionResult> DeleteConfirmed(int id)
+        {
+            try
+            {
+                await _unitOfWork.Lectures.DeleteAsync(id);
+                await _unitOfWork.SaveAsync();
+                return RedirectToAction(nameof(Index));
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, "Internal server error" + ex.Message);
+            }
+        }
+
+        private LectureViewModel MapToViewModel(Lecture lecture)
+        {
             string base64Pdf = lecture.PdfFile != null ? Convert.ToBase64String(lecture.PdfFile) : null;
-            var lectureViewModel = new LectureViewModel
+            return new LectureViewModel
             {
                 Id = lecture.Id,
                 Title = lecture.Title,
@@ -209,18 +248,6 @@ namespace ElectronicTextbook.Web.Controllers
                 AuthorId = lecture.AuthorId,
                 AuthorName = lecture.Author?.FirstName + " " + lecture.Author?.LastName
             };
-            return View(lectureViewModel);
-        }
-
-        // POST: Lectures/Delete/5
-        [HttpPost, ActionName("Delete")]
-        [ValidateAntiForgeryToken]
-        [Authorize(Roles = "Admin")]
-        public async Task<IActionResult> DeleteConfirmed(int id)
-        {
-            await _unitOfWork.Lectures.DeleteAsync(id);
-            await _unitOfWork.SaveAsync();
-            return RedirectToAction(nameof(Index));
         }
     }
 }

@@ -1,20 +1,14 @@
-﻿using ElectronicTextbook.Core.Enums;
+﻿using System.Collections.Generic;
 using Microsoft.AspNetCore.Identity;
-using System.Collections.Generic;
-
 namespace ElectronicTextbook.Core.Models
 {
-    public class User : IdentityUser<string>
+    public class User : IdentityUser
     {
-        public ICollection<Lecture> Lectures { get; set; }
-        public string RoleId { get; set; }
-        public Role Role { get; set; }
-
-        // Example method to check user role
-        public bool IsAdmin()
-        {
-            return Role?.RoleType == RoleType.Admin;
-        }
+        public int Id { get; set; }
+        public string FirstName { get; set; }
+        public string LastName { get; set; }
+        public string Email { get; set; }
+        public string PasswordHash { get; set; }
+        public ICollection<Role> Roles { get; set; }
     }
-
 }

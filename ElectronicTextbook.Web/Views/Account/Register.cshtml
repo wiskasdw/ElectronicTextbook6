@@ -1,33 +1,40 @@
 ﻿@model ElectronicTextbook.Web.ViewModels.RegisterViewModel
-<h2>Registration</h2>
-<form asp-controller="Account" asp-action="Register" method="post">
-    <div asp-validation-summary="All"></div>
-    <div>
-        <label asp-for="FirstName">First Name</label><br />
-        <input asp-for="FirstName" />
-        <span asp-validation-for="FirstName"></span>
+
+<h2>Регистрация</h2>
+<form asp-controller="Account" asp-action="Register" method="post" class="mt-4">
+    <div asp-validation-summary="All" class="alert alert-danger"></div>
+
+    <div class="form-group">
+        <label asp-for="FirstName">Имя</label><br />
+        <input asp-for="FirstName" class="form-control" />
+        <span asp-validation-for="FirstName" class="text-danger"></span>
     </div>
-    <div>
-        <label asp-for="LastName">Last Name</label><br />
-        <input asp-for="LastName" />
-        <span asp-validation-for="LastName"></span>
+
+    <div class="form-group">
+        <label asp-for="LastName">Фамилия</label><br />
+        <input asp-for="LastName" class="form-control" />
+        <span asp-validation-for="LastName" class="text-danger"></span>
     </div>
-    <div>
-        <label asp-for="Email">Email</label><br />
-        <input asp-for="Email" />
-        <span asp-validation-for="Email"></span>
+
+    <div class="form-group">
+        <label asp-for="Email">Электронная почта</label><br />
+        <input asp-for="Email" class="form-control" />
+        <span asp-validation-for="Email" class="text-danger"></span>
     </div>
-    <div>
-        <label asp-for="Password">Password</label><br />
-        <input asp-for="Password" type="password" />
-        <span asp-validation-for="Password"></span>
+
+    <div class="form-group">
+        <label asp-for="Password">Пароль</label><br />
+        <input asp-for="Password" type="password" class="form-control" />
+        <span asp-validation-for="Password" class="text-danger"></span>
     </div>
-    <div>
-        <label asp-for="ConfirmPassword">Confirm Password</label><br />
-        <input asp-for="ConfirmPassword" type="password" />
-        <span asp-validation-for="ConfirmPassword"></span>
+
+    <div class="form-group">
+        <label asp-for="ConfirmPassword">Подтверждение пароля</label><br />
+        <input asp-for="ConfirmPassword" type="password" class="form-control" />
+        <span asp-validation-for="ConfirmPassword" class="text-danger"></span>
     </div>
+
     <div>
-        <input type="submit" value="Register" />
+        <input type="submit" value="Зарегистрироваться" class="btn btn-primary" />
     </div>
 </form>

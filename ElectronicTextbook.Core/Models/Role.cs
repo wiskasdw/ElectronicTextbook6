@@ -1,13 +1,11 @@
-﻿using ElectronicTextbook.Core.Enums;
-using Microsoft.AspNetCore.Identity;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 
 namespace ElectronicTextbook.Core.Models
 {
-    public class Role : IdentityRole<string>
+    public class Role
     {
+        public int Id { get; set; }
+        public string Name { get; set; }
         public ICollection<User> Users { get; set; }
-        public RoleType RoleType { get; set; } // Add this property
     }
-
 }
